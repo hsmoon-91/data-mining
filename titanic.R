@@ -1,5 +1,5 @@
 rm(list=ls())
-data = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/titan.tr.csv",header=T)
+data = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/titanic/titan.tr.csv",header=T)
 # data = read.csv("C:/Users/HSMOON/Desktop/seminar/analysis/Titanic/kaggle data/train.csv",header=T)
 dim(data); names(data); summary(data); str(data)
 
@@ -47,22 +47,29 @@ sum(is.na(data$age))
 data$cabin
 length(sort(data$fare))
 length(data$fare)
+str(data)
 
-data$ticket
-tf.mat = cbind(data$ticket,data$fare,data$pclass,data$sibsp,data$parch)
-colnames(tf.mat) = c("ticket","fare","pclass","sibsp","parch")
-tf.mat
-tf.mat[tf.mat[,1]%in%c(1:100),]
-tf.mat[tf.mat[,1]%in%c(101:200),]
-tf.mat[tf.mat[,1]%in%c(201:300),]
-tf.mat[tf.mat[,1]%in%c(301:400),]
-tf.mat[tf.mat[,1]%in%c(401:500),]
-tf.mat[tf.mat[,1]%in%c(501:600),]
-tf.mat[tf.mat[,1]%in%c(601:700),]
-tf.mat[tf.mat[,1]%in%c(701:800),]
-tf.mat[tf.mat[,1]%in%c(801:900),]
 
-tf.mat[tf.mat[,3]==3&tf.mat[,4]==1&tf.mat[,5]==1,]
+data$sibsp
+m=cbind(data$sibsp, stringsAsFactors = default.stringsAsFactors())
+
+tf.mat = cbind(as.factor(data$ticket),as.numeric(data$fare),as.factor(data$pclass),as.factor(data$sibsp),
+               as.factor(data$parch),as.factor(data$embarked))
+tf.mat[is.na(tf.mat[,6]),]
+kk = tf.mat[tf.mat[,3]==3&tf.mat[,4]==0&tf.mat[,5]==0,]
+is.factor(tf.mat[,4])
+length(tf.mat[,4])
+length(data$sibsp)
+data[data$sibsp==0,]
+data$sibsp == tf.mat[,4]
+data[is.na(data[,"fare"]),"fare"]=mean(kk[,2],na.rm=T)
+data$embarked = as.factor(data$embarked)
+data[data[,"embarked"]=="?",]
+str(data)
+newdata = cbind(data$survived,data$pclass,data$sex,data$age,data$sibsp,data$parch,data$ticket,data$fare,data$embarked)
+names(data)
+
+
 
 ## train / test data for 'age' variable
 train = data[is.na(data$age)==F,]
