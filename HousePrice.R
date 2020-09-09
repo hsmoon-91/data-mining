@@ -1,7 +1,7 @@
 rm(list=ls())
 Data = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/house-prices/house-prices-advanced-regression-techniques/train.csv",header=T)
 ## missing data
-sum(is.na(Data)); colSums(is.na(Data)) 
+sum(is.na(Data)); colSums(is.na(Data))
 dim(Data);summary(Data)
 # remove "Id"
 df = Data[,-1]
@@ -87,7 +87,12 @@ df$OverallCond = as.character(df$OverallCond)
 str(df); sum(is.na(df))
 ## dummy 
 n.mat = model.matrix(SalePrice~.,data=df)[,-1]
+dim(n.mat)
 
+## test data
+TData = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/house-prices/house-prices-advanced-regression-techniques/test.csv",header=T)
+dim(TData); dim(df)
+colSums(is.na(TData))
 # Method : svd - regression
 # install.packages("svd")
 library(svd)
