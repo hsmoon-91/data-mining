@@ -1,41 +1,42 @@
-## Data cleansing
-## missing data
-clsn.fun = function(Data){
+## TData cleansing
+## missing TData
+clsn.fun = function(TData){
   # remove "Id"
-  df = Data[,-1]
+  tdf = TData[,-1]
   # replace NA->none
   ## Alley
-  replace(df$Alley,is.na(df$Alley),'None')->df$Alley
+  replace(tdf$Alley,is.na(tdf$Alley),'None')->tdf$Alley
   ## Basement
-  replace(df$BsmtQual,is.na(df$BsmtQual),'None')->df$BsmtQual
-  replace(df$BsmtCond,is.na(df$BsmtCond),'None')->df$BsmtCond
-  # cbind(df$BsmtCond[949],df$BsmtExposure[949])
-  df$BsmtExposure[949] = "No"
-  replace(df$BsmtExposure,is.na(df$BsmtExposure),'None')->df$BsmtExposure
-  replace(df$BsmtFinType1,is.na(df$BsmtFinType1),'None')->df$BsmtFinType1
-  replace(df$BsmtFinType2,is.na(df$BsmtFinType2),'None')->df$BsmtFinType2
+  cbind(which(is.na(tdf$BsmtCond)),which(is.na(tdf$BsmtExposure)))
+  replace(tdf$BsmtQual,is.na(tdf$BsmtQual),'None')->tdf$BsmtQual
+  replace(tdf$BsmtCond,is.na(tdf$BsmtCond),'None')->tdf$BsmtCond
+
+  tdf$BsmtExposure[949] = "No"
+  replace(tdf$BsmtExposure,is.na(tdf$BsmtExposure),'None')->tdf$BsmtExposure
+  replace(tdf$BsmtFinType1,is.na(tdf$BsmtFinType1),'None')->tdf$BsmtFinType1
+  replace(tdf$BsmtFinType2,is.na(tdf$BsmtFinType2),'None')->tdf$BsmtFinType2
   ## fire
-  replace(df$FireplaceQu,is.na(df$FireplaceQu),'None')->df$FireplaceQu
+  replace(tdf$FireplaceQu,is.na(tdf$FireplaceQu),'None')->tdf$FireplaceQu
   ## garage
-  replace(df$GarageType,is.na(df$GarageType),'None')->df$GarageType
-  replace(df$GarageYrBlt,is.na(df$GarageYrBlt),0)->df$GarageYrBlt
-  replace(df$GarageFinish,is.na(df$GarageFinish),'None')->df$GarageFinish
-  replace(df$GarageQual,is.na(df$GarageQual),'None')->df$GarageQual
-  replace(df$GarageCond,is.na(df$GarageCond),'None')->df$GarageCond
+  replace(tdf$GarageType,is.na(tdf$GarageType),'None')->tdf$GarageType
+  replace(tdf$GarageYrBlt,is.na(tdf$GarageYrBlt),0)->tdf$GarageYrBlt
+  replace(tdf$GarageFinish,is.na(tdf$GarageFinish),'None')->tdf$GarageFinish
+  replace(tdf$GarageQual,is.na(tdf$GarageQual),'None')->tdf$GarageQual
+  replace(tdf$GarageCond,is.na(tdf$GarageCond),'None')->tdf$GarageCond
   ## pool
-  replace(df$PoolQC,is.na(df$PoolQC),'None')->df$PoolQC
+  replace(tdf$PoolQC,is.na(tdf$PoolQC),'None')->tdf$PoolQC
   ## fence
-  replace(df$Fence,is.na(df$Fence),'None')->df$Fence
+  replace(tdf$Fence,is.na(tdf$Fence),'None')->tdf$Fence
   ## miscfeature
-  replace(df$MiscFeature,is.na(df$MiscFeature),'None')->df$MiscFeature
+  replace(tdf$MiscFeature,is.na(tdf$MiscFeature),'None')->tdf$MiscFeature
   ## LotFrontage / MasVnrType / MasVnrArea / Electrical
   ### MasVnrType : None / MasVnrArea : 0
-  replace(df$MasVnrType,is.na(df$MasVnrType),'None')->df$MasVnrType
-  replace(df$MasVnrArea,is.na(df$MasVnrArea),0)->df$MasVnrArea
+  replace(tdf$MasVnrType,is.na(tdf$MasVnrType),'None')->tdf$MasVnrType
+  replace(tdf$MasVnrArea,is.na(tdf$MasVnrArea),0)->tdf$MasVnrArea
   ### Electrical
-  table(df$Electrical)
-  df = df[-which(is.na(df$Electrical)),] # remove NA
+  table(tdf$Electrical)
+  tdf = tdf[-which(is.na(tdf$Electrical)),] # remove NA
   ### LotFrontage
-  replace(df$LotFrontage,is.na(df$LotFrontage),mean(log(df$LotFrontage),na.rm=T))->df$LotFrontage # mean value
-  print(list(dim(Data),str(Data),colSums(Data))
+  replace(tdf$LotFrontage,is.na(tdf$LotFrontage),mean(log(tdf$LotFrontage),na.rm=T))->tdf$LotFrontage # mean value
+  print(list(dim(TData),str(TData),colSums(TData))
 }

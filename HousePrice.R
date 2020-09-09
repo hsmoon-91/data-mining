@@ -12,7 +12,7 @@ replace(df$Alley,is.na(df$Alley),'None')->df$Alley
 ## Basement
 replace(df$BsmtQual,is.na(df$BsmtQual),'None')->df$BsmtQual
 replace(df$BsmtCond,is.na(df$BsmtCond),'None')->df$BsmtCond
-# cbind(df$BsmtCond[949],df$BsmtExposure[949])
+cbind(df$BsmtCond[949],df$BsmtExposure[949])
 df$BsmtExposure[949] = "No"
 # cbind(which(is.na(df$BsmtFinType1)),which(is.na(df$BsmtFinType2)))
 # cbind(df$BsmtFinType1[333],df$BsmtFinType2[333])
@@ -91,6 +91,7 @@ dim(n.mat)
 
 ## test data
 TData = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/house-prices/house-prices-advanced-regression-techniques/test.csv",header=T)
+
 dim(TData); dim(df)
 colSums(is.na(TData))
 # Method : svd - regression
