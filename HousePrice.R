@@ -35,22 +35,25 @@ replace(df$Fence,is.na(df$Fence),'None')->df$Fence
 ## miscfeature
 replace(df$MiscFeature,is.na(df$MiscFeature),'None')->df$MiscFeature
 ## LotFrontage / MasVnrType / MasVnrArea / Electrical
-### LotFrontage
-df$LotFrontage
 ### MasVnrType : None / MasVnrArea : 0
 replace(df$MasVnrType,is.na(df$MasVnrType),'None')->df$MasVnrType
 replace(df$MasVnrArea,is.na(df$MasVnrArea),0)->df$MasVnrArea
 ### Electrical
-df$Electrical
 table(df$Electrical)
-
-str(df)
+df = df[-which(is.na(df$Electrical)),] # remove NA
+dim(df)
+### LotFrontage
+df[is.na(df$LotFrontage),]
+plot(density(log(df$LotFrontage),na.rm=T))
+summary(log(df$LotFrontage))
+replace(df$LotFrontage,is.na(df$LotFrontage),mean(log(df$LotFrontage),na.rm=T))->df$LotFrontage # mean value
 
 # chr : MSSubClass / OverallQual / OverallCond
 # int : 
 # date : YearBuilt / YearRemodAdd / GarageYrBlt / MoSold / YrSold
 strDate = cbind(as.numeric(df$YearRemodAdd),as.numeric(df$YearBuilt))
-year_gap = drop(strDate[,1])-drop(strDate[,2]) # remove YearBuilt / YearRemodAdd
+df$year_gap = drop(strDate[,1])-drop(strDate[,2]) 
+df = df[,-c(19,20)]# remove YearBuilt / YearRemodAdd
 
 df = within(df,{
   GarageYrBlt_f = character(0)
@@ -62,12 +65,30 @@ df = within(df,{
   GarageYrBlt_f[ GarageYrBlt >= 2001] = "6"
   
   GarageYrBlt_f = factor(GarageYrBlt_f, level = c("1","2","3","4","5","6","None"))})
-replace(df$GarageYrBlt_f,is.na(df$GarageYrBlt_f),"None") -> df$GarageYrBlt_f # add GarageYrBlt_f / remove GarageYrBlt
+replace(df$GarageYrBlt_f,is.na(df$GarageYrBlt_f),"None")->df$GarageYrBlt_f # add GarageYrBlt_f
+df = df[,-57] # remove GarageYrBlt
 
 # install.packages("tidyr")
-library(tidyr)
-df = unite(df, "sold_year_month", c(YrSold, MoSold), sep="/")
-sold_date = as.Date(df$sold_year_month, format = '%Y%m')
-as.Date(df$sold_year_month, "%m/%d/%Y")
-str(df$sold_year_month)
-as.Date(as.character(c("2008/02/05", "2009/02/05")), "%Y/%m/%d")
+# library(tidyr) # merge variable
+df = within(df,{
+  season = character(0)
+  season[ MoSold >= 1 & MoSold < 4 ] = "sp" 
+  season[ MoSold >= 4 & MoSold < 7 ] = "sm" 
+  season[ MoSold >= 7 & MoSold < 10 ] = "fl" 
+  season[ MoSold >= 10 ] = "wn" 
+  
+  season = factor(season, level = c("sp","sm","fl","wn"))})  
+df = df[,-73] # remove MoSold
+
+df$MSSubClass = as.character(df$MSSubClass)
+df$OverallQual = as.character(df$OverallQual)
+df$OverallCond = as.character(df$OverallCond)
+
+str(df); sum(is.na(df))
+## dummy 
+n.mat = model.matrix(SalePrice~.,data=df)[,-1]
+
+# Method : svd - regression
+# install.packages("svd")
+library(svd)
+
