@@ -7,7 +7,7 @@ clsn.fun = function(TData){
   ## Alley
   replace(tdf$Alley,is.na(tdf$Alley),'None')->tdf$Alley
   ## Basement
-  cbind(which(is.na(tdf$BsmtCond)),which(is.na(tdf$BsmtExposure)))
+  cbind(which(is.na(tdf$BsmtQual)),which(is.na(tdf$BsmtCond)),which(is.na(tdf$BsmtExposure)))
   replace(tdf$BsmtQual,is.na(tdf$BsmtQual),'None')->tdf$BsmtQual
   replace(tdf$BsmtCond,is.na(tdf$BsmtCond),'None')->tdf$BsmtCond
 

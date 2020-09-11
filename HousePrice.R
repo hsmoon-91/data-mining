@@ -78,23 +78,113 @@ df = within(df,{
   season[ MoSold >= 10 ] = "wn" 
   
   season = factor(season, level = c("sp","sm","fl","wn"))})  
-df = df[,-73] # remove MoSold
+df = df[,-73] # remove MoSold8
 
 df$MSSubClass = as.character(df$MSSubClass)
 df$OverallQual = as.character(df$OverallQual)
 df$OverallCond = as.character(df$OverallCond)
 
 str(df); sum(is.na(df))
-## dummy 
-n.mat = model.matrix(SalePrice~.,data=df)[,-1]
-dim(n.mat)
 
+c.var = NULL
+for(i in 1:ncol(df)){
+  if(is.character(df[,i])==T){df[,i] = as.factor(df[,i])}
+  if(is.numeric(df[,i]) | is.integer(df[,i])){c.var = c(c.var, colnames(df)[i])}
+}
+
+## dummy 
+d.mat = model.matrix(SalePrice~.,data=df)[,-1]
+dim(d.mat)
+is.data.frame(d.mat)
 ## test data
 TData = read.csv("C:/Users/HSMOON/Desktop/mygit/data-mining/house-prices/house-prices-advanced-regression-techniques/test.csv",header=T)
-
 dim(TData); dim(df)
 colSums(is.na(TData))
-# Method : svd - regression
+
+dat = as.data.frame(cbind(SalePrice=df$SalePrice,d.mat))
+str(dat)
+# install.packages("operators")
+# library(operators)
+# for(i in 1:ncol(dat)){
+#   if(colnames(dat)[i] %!in% c.var){dat[,i] = as.factor(dat[,i])}
+# }
+
+
+# Method  -----------------------------------------------------------------
+
+
+# 1. svd - regression
 # install.packages("svd")
 library(svd)
+svd.mat = svd(d.mat)
+D = diag(svd.mat$d)
 
+plot(svd.mat$d^2/sum(svd.mat$d^2), type="l", xlab="Singualar vector",ylab = "variance explained")
+plot(cumsum(svd.mat$d^2/sum(svd.mat$d^2)), type="l",xlab = "Singular vector",ylab = "Cumulative percent of variance explained")
+U = svd.mat$u[1:nrow(svd.mat$u),1:30]
+D = diag(svd.mat$d[1:30])
+V = svd.mat$v[1:nrow(svd.mat$v),1:30]
+
+dd = U%*%D%*%t(V)
+dim(dd)
+# regression 
+reg_model = lm(SalePrice~., data=dat)
+# regression with LASSO
+library(glmnet)
+# intrain = createDataPartition(dat$SalePrice,p=0.7,list=F)
+# tr.x = d.mat[intrain,]; tr.y = df$SalePrice[intrain]
+# ts.x = dat[-intrain,]; ts.y = df$SalePrice[-intrain]
+lsso_model = cv.glmnet(d.mat,df$SalePrice,alpha=1,nfolds=5)
+# regression with SCAD
+library(ncvreg)
+scad_model = cv.ncvreg(d.mat,df$SalePrice,penalty="SCAD",nfolds=5)
+# decision tree : dummy x?
+library(caret)
+library(tree)
+# intrain = createDataPartition(dat$SalePrice,p=0.7,list=F)
+# tr = dat[intrain,];ts = dat[-intrain,]
+
+idx = sample(1:nrow(dat),size=nrow(dat)*0.7)
+tr = dat[idx,]; ts = dat[-idx,];
+set.seed(2020)
+str(df) ; str(dat)
+tree_model = tree(SalePrice~., data=df)
+tree_model = tree(SalePrice~., data=dat)
+
+
+
+# Random Forest 
+library(randomForest)
+
+## tuning paramter : ntree, mtry
+set.seed(2020)
+nt.vec = seq(100,500,by=100)
+m.mat = NULL; fold = 1:5
+for(fid in fold){
+  print(fid)
+  idx = sample(1:nrow(dat),size=nrow(dat)*0.7)
+  tr = dat[idx,]; ts = dat[-idx,];
+  attach(tr)
+  m.vec = NULL
+  for(n in nt.vec){
+    fm = randomForest(SalePrice~.,data=tr,ntree=n)
+   # print(fm)
+    pval = predict(fm,newdata=ts,type="response")
+    m.vec = c(m.vec,mean((pval-ts$SalePrice)^2))
+  }
+  m.mat = rbind(m.mat,m.vec)
+}
+opt = which.min(colMeans(m.mat))
+nt = nt.vec[opt]
+attach(dat)
+rf_model = randomForest(SalePrice~.,ntree=nt,data=dat)
+importance(rf_model)
+getTree(rf_model, 1, labelVar=T)
+
+# svm
+library(e1071)
+library(kernlab)
+
+idx = sample(1:nrow(df),size=nrow(df)*0.7)
+tr.mat = df[idx,]; ts.mat = df[-idx,]
+svm_tune = tune()
